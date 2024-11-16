@@ -49,7 +49,7 @@ export default StyleSheet.create({
   cardValue: {
     fontSize: 30,
     fontStyle:'normal',
-    color: '#333'
+    color: '#333', fontWeight: 'bold', // D
   },
 
   cardValueSumA: {

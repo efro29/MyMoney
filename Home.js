@@ -47,7 +47,32 @@ function HomeScreen({ navigation }) {
     );
   })
   .reduce((sum, item) => sum + item.value, 0);
+
+
+
+
+
+  const sumTotalA = transactions
+  .filter(item => {
+    const itemDate = new Date(item.date);
+    return (
+      item.type === "A" 
+    );
+  })
+  .reduce((sum, item) => sum + item.value, 0);
+
+  const sumTotalB = transactions
+  .filter(item => {
+    const itemDate = new Date(item.date);
+    return (
+      item.type === "B" 
+    );
+  })
+  .reduce((sum, item) => sum + item.value, 0);
   
+  const balance = sumTotalA - sumTotalB ;
+
+
 
   const loadClients = async () => {
     try {
@@ -83,7 +108,7 @@ function HomeScreen({ navigation }) {
     const intervalId = setInterval(async () => {
       const loadedClients = await loadClients();
       setClients(loadedClients);
-    }, 10000); // Atualiza a cada 1000ms (1 segundo)
+    }, 1000); // Atualiza a cada 1000ms (1 segundo)
 
     // Limpeza do intervalo quando o componente for desmontado
     return () => clearInterval(intervalId);
@@ -91,8 +116,16 @@ function HomeScreen({ navigation }) {
 
 
   useEffect(() => {
-    loadInitialBalance();
+    const intervalId = setInterval(async () => {
+      const loadedClients = await loadClients();
+      loadInitialBalance();
+    }, 1000); // Atualiza a cada 1000ms (1 segundo)
+
+    // Limpeza do intervalo quando o componente for desmontado
+    return () => clearInterval(intervalId);
   }, []);
+
+
 
   const openModal = (button) => {
     setSelectedButton(button);
@@ -129,7 +162,7 @@ function HomeScreen({ navigation }) {
       updatedBalance = initialBalance + newValue;
       Alert.alert("Valor Inserido", `R$ ${newValue.toFixed(2)} foi adicionado ao saldo inicial. Comentário: ${comment}`);
     } else if (selectedButton === 'B') {
-      if (newValue > initialBalance) {
+      if (newValue > balance) {
         Alert.alert("Erro", "Não é possível subtrair um valor maior que o saldo atual.");
         return;
       }
@@ -193,6 +226,8 @@ function HomeScreen({ navigation }) {
     Estudos: { color: '#f4edfa', icon: 'pencil' }, // Usando 'cocktail' para Lazer
   };
 
+
+
   return (
     <SafeAreaView style={styles.appContainer}>
       
@@ -207,7 +242,7 @@ function HomeScreen({ navigation }) {
                 <View style={styles.textContainer}>
                 <Text style={styles.cardTitle}>Carteira</Text>
                   <Text style={styles.cardValue}>
-                  R$ {initialBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Text>
                   <View style={styles.cardContent}>
                     <Text style={styles.cardValueSumA}>

@@ -54,7 +54,7 @@ function HomeScreen({ navigation }) {
       const storedClients = await AsyncStorage.getItem('clients');
       return storedClients ? JSON.parse(storedClients) : [];
     } catch (error) {
-      console.error('Erro ao carregar clientes:', error);
+      // console.error('Erro ao carregar clientes:', error);
       return [];
     }
   };
@@ -83,7 +83,7 @@ function HomeScreen({ navigation }) {
     const intervalId = setInterval(async () => {
       const loadedClients = await loadClients();
       setClients(loadedClients);
-    }, 1000); // Atualiza a cada 1000ms (1 segundo)
+    }, 10000); // Atualiza a cada 1000ms (1 segundo)
 
     // Limpeza do intervalo quando o componente for desmontado
     return () => clearInterval(intervalId);
@@ -281,7 +281,7 @@ function HomeScreen({ navigation }) {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Insira o valor para o botão {selectedButton}</Text>
+              <Text style={styles.modalTitle}>Insira um valor</Text>
               <TextInput
                 style={styles.input}
                 placeholder="R$ 0,00"
@@ -297,19 +297,18 @@ function HomeScreen({ navigation }) {
               />
 
 <RNPickerSelect
- style={{
-  inputIOS: styles.input, // Estilo para iOS
-  inputAndroid: styles.input, // Estilo para Android
-}}
+ style={{backgroundColor:'red'}}
+
         onValueChange={(value) => {
-          console.log('Cliente selecionado ID:', value);
+          // console.log('Cliente selecionado ID:', value);
           setSelectedClient(value); // Atualiza o estado com o cliente selecionado
         }}
+   
         items={clientItems} // Passando os clientes mapeados
       />
 
               <View style={styles.modalButtonContainer}>
-                <Button title="Inserir" onPress={insertValue} />
+                <Button  title="Inserir" onPress={insertValue} />
                 <Button title="Fechar" onPress={closeModal} />
               </View>
             </View>

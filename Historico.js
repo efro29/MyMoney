@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, FlatList, StyleSheet, TouchableOpacity ,SafeAreaView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -11,7 +11,7 @@ const loadTransactions = async () => {
     const storedTransactions = await AsyncStorage.getItem('transactions');
     if (storedTransactions !== null) {
       const parsedTransactions = JSON.parse(storedTransactions);
-      console.log("Transações carregadas:", parsedTransactions);
+      // console.log("Transações carregadas:", parsedTransactions);
 
       // Ordenando as transações por data do mais recente para o mais antigo
       const sortedTransactionsDesc = parsedTransactions.sort(
@@ -60,13 +60,13 @@ const loadTransactions = async () => {
     const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
     return (
+      
       <View style={[
-        styles.transactionItem,
-        item.type === 'A' ? styles.incomeItem : styles.expenseItem
+        styles.transactionItem, item.type === 'A' ? styles.incomeItem : styles.expenseItem
       ]}>
         <View>
-          <Text style={styles.transactionText}>
-            {item.category}: R$ {item.value.toFixed(2)}
+          <Text style={item.type === 'A' ? styles.transactionTextReceita : styles.expenseItemDespesa}>
+             {item.type === 'A' ? "+" : "-"} R$ {item.value.toFixed(2)}
           </Text>
           {item.comment ? (
             <Text style={styles.commentText}>Comentário: {item.comment}</Text>
@@ -82,7 +82,10 @@ const loadTransactions = async () => {
   };
 
   return (
-    <View style={{height:645,padding:11}}>
+    <SafeAreaView style={styles.appContainer}>
+    <View style={
+      
+      {height:645,padding:11}}>
     
       {transactions.length === 0 ? (
         <Text style={styles.emptyMessage}>Nenhuma transação registrada.</Text>
@@ -94,6 +97,7 @@ const loadTransactions = async () => {
         />
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -111,6 +115,7 @@ const styles = StyleSheet.create({
   },
   transactionItem: {
     padding: 10,
+    elevation:4,
     marginVertical: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
@@ -121,15 +126,25 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   incomeItem: {
-    backgroundColor: '#d4edda', // Verde claro para receitas
+    backgroundColor: '#ccfff4', // Verde claro para receitas
   },
   expenseItem: {
-    backgroundColor: '#f8d7da', // Vermelho claro para despesas
+    backgroundColor: '#fff', // Vermelho claro para despesas
   },
   transactionText: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+  },
+  transactionTextReceita: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'green',
+  },
+  expenseItemDespesa: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'red',
   },
   commentText: {
     fontSize: 14,
@@ -151,6 +166,7 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
   },
+
 });
 
 export default HistoricoScreen;

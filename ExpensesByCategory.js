@@ -12,7 +12,7 @@ function ExpensesByCategory() {
       const storedTransactions = await AsyncStorage.getItem('transactions');
       if (storedTransactions !== null) {
         const parsedTransactions = JSON.parse(storedTransactions);
-        console.log("Transações carregadas:", parsedTransactions);
+        // console.log("Transações carregadas:", parsedTransactions);
 
         // Ordenando as transações por data do mais recente para o mais antigo
         const sortedTransactionsDesc = parsedTransactions.sort(
@@ -133,12 +133,13 @@ function ExpensesByCategory() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 16,
+   
+    padding: 10,
     backgroundColor: '#f0f0f0',
+    height:645,padding:11
   },
   categoryContainer: {
-    marginVertical: 10,
+    marginVertical: 4,
     padding: 10,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -176,10 +177,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   incomeItem: {
-    backgroundColor: '#d5f0e5', // Verde claro para receitas
+    backgroundColor: '#ccfff4', // Verde claro para receitas
   },
   expenseItem: {
-    backgroundColor: '#f7eee6', // Vermelho claro para despesas
+    backgroundColor: '#fff', // Vermelho claro para despesas
   },
   transactionText: {
     fontSize: 16,

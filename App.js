@@ -4,11 +4,9 @@ import { View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
-import LinearGradient from 'react-native-linear-gradient';
 import HomeScreen from './Home';
 import HistoricoScreen from './Historico';
 import WeeklyExpensesScreen from './WeeklyExpensesScreen';
-import CategoriaScreen from './Categoria';
 import ExpensesByCategory from './ExpensesByCategory';
 // Componentes de Tela adicionais
 function SearchScreen() {
@@ -57,7 +55,7 @@ export default function App() {
           tabBarStyle: styles.tabBar,
 
           headerStyle: {
-            backgroundColor: '#6200ee', // Altere essa cor para customizar o fundo do header
+            backgroundColor: '#1e153b', height:75// Altere essa cor para customizar o fundo do header
           },
           headerTintColor: '#ffffff', // Cor do texto do header
           headerTitleAlign: 'center', // Centraliza o título do header
@@ -90,7 +88,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: '#ffffff',
-    elevation: 15, // sombra mais suave
+    elevation: 10, // sombra mais suave
     shadowColor: '#000', // sombra para iOS
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 5 },

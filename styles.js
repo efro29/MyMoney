@@ -53,12 +53,12 @@ export default StyleSheet.create({
   },
 
   cardValueSumA: {
-    fontSize: 15,
+    fontSize: 12,
     fontStyle:'normal',
     color: 'green'
   },
   cardValueSumB: {
-    fontSize: 15,
+    fontSize: 12,
     fontStyle:'normal',
     color: 'red'
   },
@@ -73,7 +73,7 @@ export default StyleSheet.create({
   buttonA: {
     flex: 1,
     paddingVertical: 15,
-    backgroundColor: '#00C851',
+    backgroundColor: '#592375',
     borderRadius: 10, // Botões com bordas arredondadas
     marginHorizontal: 8,
     alignItems: 'center',
@@ -86,7 +86,7 @@ export default StyleSheet.create({
   buttonB: {
     flex: 1,
     paddingVertical: 15,
-    backgroundColor: '#ff4444',
+    backgroundColor: '#8b689e',
     borderRadius: 10,
     marginHorizontal: 8,
     alignItems: 'center',
@@ -188,8 +188,8 @@ export default StyleSheet.create({
     textAlign: 'center',
   },
   walletIcon: {
-    width: 70,
-    height: 70,
+    width: 100,
+    height: 100,
     marginRight: 10, // Mantém o espaço entre a imagem e o texto
   },
 });

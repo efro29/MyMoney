@@ -58,12 +58,27 @@ const loadTransactions = async () => {
     // Formatar a data
     const date = new Date(item.date);
     const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthDate = months[date.getMonth()];
+    const formattedDay = `${String(date.getDate()).padStart(2, '0')}`;
+    const formattedYear = `${date.getFullYear()}`;
 
     return (
       
       <View style={[
         styles.transactionItem, item.type === 'A' ? styles.incomeItem : styles.expenseItem
       ]}>
+
+
+        <View style={{backgroundColor:'#fbf5ff',borderRadius:5,borderColor:'#b0abb3',borderWidth:1,padding:5,margin:5,alignContent:'center',alignItems:'center',width:60}}>
+          <Text style={{fontSize:25,fontWeight:'900'}}>{formattedDay}</Text>
+          <Text style={{fontSize:8,fontWeight:'bold',color:'gray'}}>{monthDate} {formattedYear}</Text>
+          
+          
+        </View>
+
+    
+
         <View>
           <Text style={item.type === 'A' ? styles.transactionTextReceita : styles.expenseItemDespesa}>
              {item.type === 'A' ? "+" : "-"} R$ {item.value.toFixed(2)}
@@ -71,13 +86,16 @@ const loadTransactions = async () => {
           {item.comment ? (
             <Text style={styles.commentText}>Comentário: {item.comment}</Text>
           ) : null}
-          <Text style={styles.dateText}>Data: {formattedDate}</Text> 
+       
           <Text style={styles.dateText}>Client: {item.clientId}</Text> 
         </View>
+
+
         <TouchableOpacity onPress={() => removeTransaction(index)}>
           <Text style={styles.removeButton}>Remover</Text>
         </TouchableOpacity>
       </View>
+
     );
   };
 
@@ -85,7 +103,7 @@ const loadTransactions = async () => {
     <SafeAreaView style={styles.appContainer}>
     <View style={
       
-      {height:645,padding:11}}>
+      {height:645,padding:15}}>
     
       {transactions.length === 0 ? (
         <Text style={styles.emptyMessage}>Nenhuma transação registrada.</Text>
@@ -104,7 +122,7 @@ const loadTransactions = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 10,
     backgroundColor: '#f0f0f0',
   },
   header: {
@@ -114,9 +132,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   transactionItem: {
-    padding: 10,
+    padding: 1,
     elevation:4,
-    marginVertical: 5,
+    marginVertical: 1.5,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     backgroundColor: '#fff',
@@ -165,6 +183,7 @@ const styles = StyleSheet.create({
   removeButton: {
     color: 'red',
     fontWeight: 'bold',
+    padding:10
   },
 
 });

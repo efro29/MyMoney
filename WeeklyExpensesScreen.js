@@ -3,6 +3,7 @@ import { View, Text, SafeAreaView, TextInput, FlatList, StyleSheet, Alert, Touch
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
 
+
 // Função para adicionar barras na data enquanto o usuário digita
 const formatDate = (text) => {
   let cleanedText = text.replace(/\D/g, '');
@@ -54,6 +55,11 @@ const WeeklyExpensesScreen = () => {
   const [clients, setClients] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingClient, setEditingClient] = useState(null); // Estado para cliente em edição
+  const [mensalDinheiro, setInputValue] = useState('');
+  const [pontos,setPontos] = useState(50)
+  const [meta,setMeta] = useState(0)
+  const [transactions, setTransactions] = useState([]);
+
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -63,19 +69,71 @@ const WeeklyExpensesScreen = () => {
     fetchClients();
   }, []);
 
+
+  const loadInitialBalance = async () => {
+    try {
+      const storedBalance = await AsyncStorage.getItem('initialUBalance');
+      const storedTransactions = await AsyncStorage.getItem('transactions');
+      if (storedBalance !== null) {
+        setInitialBalance(parseFloat(storedBalance));
+      }
+      if (storedTransactions !== null) {
+        setTransactions(JSON.parse(storedTransactions));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados", error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      const loadedClients = await loadClients();
+      loadInitialBalance();
+    }, 1000); // Atualiza a cada 1000ms (1 segundo)
+
+    // Limpeza do intervalo quando o componente for desmontado
+    return () => clearInterval(intervalId);
+
+    loadInitialBalance();
+  }, []);
+
+
+
+
+  const handleInputChange = (text) => {
+    // Atualiza o valor digitado
+    setInputValue(text);
+
+    // Calcula a meta e atualiza
+    const valorNumerico = parseFloat(text); // Converte o texto para número
+    if (!isNaN(valorNumerico)) {
+      setMeta(Math.round(valorNumerico / 30)); // Calcula a meta
+    } else {
+      setMeta(0); // Define meta como 0 se o valor não for numérico
+    }
+  };
+
+  
+
   const handleAddClient = async () => {
     if (!name.trim() || !birthdate.trim()) {
       alert('Por favor, preencha todos os campos.');
       return;
     }
 
+
+
     const newClient = {
       id: Date.now().toString(),
       name,
       birthdate,
       color: getRandomColor(),
-      registrationDate: new Date().toLocaleDateString(), // Data atual formatada
+      registrationDate: new Date().toLocaleDateString(), 
+      mensalDinheiro,pontos,meta
     };
+    
 
     const updatedClients = [...clients, newClient];
     await saveClients(updatedClients);
@@ -83,6 +141,8 @@ const WeeklyExpensesScreen = () => {
     setName('');
     setBirthdate('');
     setModalVisible(false);
+    setInputValue('');
+    
   };
 
   const handleEditClient = async () => {
@@ -93,7 +153,7 @@ const WeeklyExpensesScreen = () => {
 
     const updatedClients = clients.map((client) =>
       client.id === editingClient.id
-        ? { ...client, name, birthdate }
+        ? { ...client, name, birthdate,mensalDinheiro,pontos }
         : client
     );
     await saveClients(updatedClients);
@@ -102,6 +162,8 @@ const WeeklyExpensesScreen = () => {
     setBirthdate('');
     setEditingClient(null);
     setModalVisible(false);
+    setInputValue('');
+    
   };
 
   const handleDeleteClient = async (id) => {
@@ -123,11 +185,124 @@ const WeeklyExpensesScreen = () => {
     );
   };
 
-  const renderClientCard = ({ item }) => (
+
+
+// Agrupar transações por cliente e data
+const transacoesAgrupadas = transactions.reduce((acc, tx) => {
+  if (tx.type === "B") { // Somente as despesas
+    const date = tx.date.split("T")[0]; // Extrai a data no formato YYYY-MM-DD
+    if (!acc[tx.clientId]) {
+      acc[tx.clientId] = {}; // Cria um objeto para o cliente, se não existir
+    }
+    if (!acc[tx.clientId][date]) {
+      acc[tx.clientId][date] = 0; // Cria um contador de soma diária para aquele dia
+    }
+    acc[tx.clientId][date] += tx.value; // Soma as despesas por data
+  }
+  return acc;
+}, {});
+
+// Cálculo da pontuação diária e total por cliente
+const pontosTotais = Object.entries(transacoesAgrupadas).map(([clientId, transacoes]) => {
+  const cliente = clients.find(c => c.name === clientId);
+  let totalPontos = 0;
+
+  // Calcular a pontuação diária para cada data
+  Object.entries(transacoes).forEach(([date, somaDiaria]) => {
+    const resultado = Math.round((cliente.meta - somaDiaria) / cliente.meta * 100);
+    totalPontos += resultado; // Soma a pontuação do dia
+  });
+
+  return { clientId, totalPontos, nome: cliente.name };
+});
+
+// Definir nível baseado na pontuação total
+const nivelTabela = [
+  { nivel: "Ferro", minPontos: 0 },
+  { nivel: "Bronze", minPontos: 100 },
+  { nivel: "Prata", minPontos: 200 },
+  { nivel: "Ouro", minPontos: 300 },
+  { nivel: "Diamante", minPontos: 400 },
+  { nivel: "Conde Claus", minPontos: 500 },
+  { nivel: "Mão de Vaca", minPontos: 600 }
+];
+
+// Determinar o nível do cliente baseado na pontuação total
+const niveisClientes = pontosTotais.map(cliente => {
+  // Encontrar o nível correspondente ou atribuir o primeiro nível se não houver correspondência
+  const nivel = nivelTabela.find(n => cliente.totalPontos >= n.minPontos) || nivelTabela[0];
+  return { nome: cliente.nome, totalPontos: cliente.totalPontos, nivel: nivel.nivel };
+});
+
+// Exibir os resultados
+niveisClientes.forEach(({ nome, totalPontos, nivel }) => {
+
+});
+
+
+const renderClientCard = ({ item }) => {
+  // Encontre os dados do cliente a partir do array clients
+  const client = clients.find(c => c.id === item.id);
+  
+  // Calcule a pontuação total e o nível do cliente
+  const transacoesDoCliente = transactions.filter(tx => tx.clientId === item.name); // Filtra transações por cliente
+
+  let totalPontos = 0;
+  transacoesDoCliente.forEach(tx => {
+    if (tx.type === "B") { // Considerando apenas as despesas
+      const meta = client.meta; // Meta diária do cliente
+      const somaDiaria = tx.value;
+      let resultado = Math.round((meta - somaDiaria) / meta * 100);
+    
+
+      if (resultado < -24) {
+        resultado = -24;
+      }
+
+
+      totalPontos += resultado;
+
+      if (totalPontos < 0) {
+        totalPontos = 0;
+      }
+  
+    }
+  });
+
+  // Definir o nível do cliente com base nos pontos totais
+  const nivelTabela = [
+    { nivel: "Ferro: Gastador", minPontos: 0, cor: "gray" },        // Cor Cinza
+    { nivel: "Bronze: Senhor do Cartão de Crédito", minPontos: 100, cor: "#CD7F32" },  // Cor Bronze
+    { nivel: "Prata: Aficionado por Descontos", minPontos: 200, cor: "silver" },    // Cor Prata
+    { nivel: "Ouro: Saqueador de Lojas", minPontos: 300, cor: "gold" },       // Cor Gold
+    { nivel: "Muquirana: Milionário de Cartão de Crédito", minPontos: 400, cor: "blue" },   // Cor Azul
+    { nivel: "Conde Claus", minPontos: 500, cor: "green" },// Cor Verde
+    { nivel: "Mão de Vaca: Mestre da Poupança", minPontos: 600, cor: "purple" }// Cor Lilás
+  ];
+  
+  const nivel = nivelTabela.reverse().find(n => totalPontos >= n.minPontos) || nivelTabela[0];
+
+  const indiceAtual = nivelTabela.findIndex(n => n.nivel === nivel.nivel);
+  const proximoNivel = indiceAtual < nivelTabela.length - 0 ? nivelTabela[indiceAtual -1] : null;
+
+  let pontosFaltando = 0;
+  if (proximoNivel) {
+    pontosFaltando = proximoNivel.minPontos - totalPontos;
+  }
+
+
+  console.log(pontosFaltando)
+
+
+
+  // Cor do card de acordo com o nível
+  const cardColor = nivel.cor;
+
+  return (
     <View style={styles.cardContainer}>
       {/* Simulando uma textura com gradientes e linhas */}
       <View
-        style={[styles.card, { backgroundColor: item.color, borderColor: item.color }]}
+        style={[styles.card, { backgroundColor: cardColor, borderColor: cardColor }]} // Cor de fundo do card com base no nível
       >
         {/* Botões Deletar e Editar */}
         <View style={styles.buttonsContainer}>
@@ -156,7 +331,7 @@ const WeeklyExpensesScreen = () => {
         {/* Nome do Banco e Ícone */}
         <View style={styles.bankContainer}>
           <MaterialIcons name="account-balance" size={16} color="rgba(255, 255, 255, 0.8)" />
-          <Text style={styles.bankName}>My Money</Text>
+          <Text style={styles.bankName}>{nivel.nivel}</Text>
         </View>
 
         {/* Nome do Cliente (Resumido) */}
@@ -174,9 +349,17 @@ const WeeklyExpensesScreen = () => {
           <Text style={styles.registrationDate}>Solicitado em: {item.registrationDate}</Text>
           <Text style={styles.birthDate}>Aniversário: {item.birthdate}</Text>
         </View>
+
+        {/* Pontuação e Nível */}
+        <View style={styles.dateContainer}>
+          <Text style={styles.scoreText}>Pontos: {totalPontos}</Text>
+            
+        </View>
       </View>
     </View>
   );
+};
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -215,6 +398,24 @@ const WeeklyExpensesScreen = () => {
               onChangeText={setName}
               style={styles.modalInput}
             />
+
+          <TextInput
+            placeholder="Renda Mensal"
+            value={mensalDinheiro}
+            keyboardType="numeric"
+            onChangeText={handleInputChange} // Chama a função para lidar com a mudança
+            style={styles.modalInput}
+            />
+
+          <TextInput
+              readOnly
+            placeholder="Renda Mensal"
+            value={'Meta Diária : R$'+meta.toFixed(2)}
+            keyboardType="numeric"
+            style={styles.modalInput}
+            />
+
+       
 
             {/* Campo Data de Aniversário com máscara */}
             <TextInput

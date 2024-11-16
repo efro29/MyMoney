@@ -15,12 +15,28 @@ function HomeScreen({ navigation }) {
   const [initialBalance, setInitialBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [clients, setClients] = useState([]);
+  const [data,setData] = useState(0)
 
   const [selectedClient, setSelectedClient] = useState(null);
   const clientItems = clients.map(client => ({
     label: client.name, // Exibe o nome do cliente
     value: client.name, // Usamos o ID como o valor único para o cliente
   }));
+
+  // Função para adicionar barras na data enquanto o usuário digita
+const formatDate = (text) => {
+  let cleanedText = text.replace(/\D/g, '');
+  
+  if (cleanedText.length <= 2) {
+    cleanedText = cleanedText.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+  } else if (cleanedText.length <= 4) {
+    cleanedText = cleanedText.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+  } else {
+    cleanedText = cleanedText.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
+  }
+
+  return cleanedText;
+};
 
   const now = new Date();
   const currentMonth = now.getMonth(); // Mês atual (0 = Janeiro, 11 = Dezembro)
@@ -108,7 +124,7 @@ function HomeScreen({ navigation }) {
     const intervalId = setInterval(async () => {
       const loadedClients = await loadClients();
       setClients(loadedClients);
-    }, 1000); // Atualiza a cada 1000ms (1 segundo)
+    }, 10000); // Atualiza a cada 1000ms (1 segundo)
 
     // Limpeza do intervalo quando o componente for desmontado
     return () => clearInterval(intervalId);
@@ -136,26 +152,35 @@ function HomeScreen({ navigation }) {
 
   const closeModal = () => {
     setModalVisible(false);
+    setData(0)
   };
 
   const insertValue = async () => {
+
     if (!inputValue || isNaN(inputValue)) {
       Alert.alert("Erro", "Por favor, insira um valor numérico.");
       return;
     }
 
+   
     const newValue = parseFloat(inputValue);
     let updatedBalance;
     
-    // Obtenha a data e hora atuais
-    const now = new Date().toISOString();
+ 
+    const [day, month, year] = data.split("/"); // Divide a string em partes
+    const now = new Date(year, month - 1, day).toISOString();
+
+
+
+  
+
 
     let transaction = { 
       value: newValue, 
       comment, 
       category: comment || "Outros", 
       type: selectedButton,
-      date: now ,clientId: selectedClient
+      date:  now   ,clientId: selectedClient
     };
 
     if (selectedButton === 'A') {
@@ -259,6 +284,7 @@ function HomeScreen({ navigation }) {
             </View>
 
 
+
             <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.buttonA} onPress={() => openModal('A')}>
 
@@ -283,10 +309,7 @@ function HomeScreen({ navigation }) {
               </View>
           </TouchableOpacity>
         </View>
-
-
-
-
+            
 
         <View style={styles.gridContainer}>
           {['Lar', 'Transporte', 'Alimentação', 'Lazer','Saude','Estudos'].map((category) => (
@@ -305,8 +328,8 @@ function HomeScreen({ navigation }) {
           ))}
         </View>
 
-        
-       
+
+
 
         <Modal
           animationType="slide"
@@ -331,6 +354,17 @@ function HomeScreen({ navigation }) {
                 onChangeText={setComment}
               />
 
+
+
+          <TextInput
+              placeholder="Data"
+              value={data}
+              onChangeText={(text) => setData(formatDate(text))}
+              style={styles.modalInput}
+              keyboardType="numeric"
+            />
+
+
 <RNPickerSelect
  style={{backgroundColor:'red'}}
 
@@ -341,6 +375,7 @@ function HomeScreen({ navigation }) {
    
         items={clientItems} // Passando os clientes mapeados
       />
+
 
               <View style={styles.modalButtonContainer}>
                 <Button  title="Inserir" onPress={insertValue} />

@@ -192,4 +192,13 @@ export default StyleSheet.create({
     height: 100,
     marginRight: 10, // Mantém o espaço entre a imagem e o texto
   },
+  modalInput: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    marginBottom: 15,
+    fontSize: 16,
+  },
 });

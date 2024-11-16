@@ -8,6 +8,8 @@ import HomeScreen from './Home';
 import HistoricoScreen from './Historico';
 import WeeklyExpensesScreen from './WeeklyExpensesScreen';
 import ExpensesByCategory from './ExpensesByCategory';
+import NivelPage from './nivel';
+
 // Componentes de Tela adicionais
 function SearchScreen() {
   return <View style={styles.screen}><Text>Search Screen</Text></View>;
@@ -65,7 +67,7 @@ export default function App() {
         <Tab.Screen name="Historic" component={HistoricoScreen} options={{ title: 'Histórico' }} />
         <Tab.Screen name="Categorias" component={ExpensesByCategory} />
         <Tab.Screen name="Profile" component={WeeklyExpensesScreen} />
-        <Tab.Screen name="Notifications" component={ProfileScreen} />
+        <Tab.Screen name="Notifications" component={NivelPage} />
         
       </Tab.Navigator>
     </NavigationContainer>

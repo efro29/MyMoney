@@ -24,9 +24,16 @@ function ExpensesByCategory() {
         
         // Agrupando as transações por categoria
         const grouped = limitedTransactions.reduce((acc, transaction) => {
-          const { category } = transaction;
-          if (!acc[category]) acc[category] = [];
-          acc[category].push(transaction);
+          const { category, value, type } = transaction;
+        
+          if (!acc[category]) {
+            acc[category] = { transactions: [], total: 0 };
+          }
+        
+          // Soma o valor de acordo com o tipo (receita ou despesa)
+          acc[category].transactions.push(transaction);
+          acc[category].total += type === 'A' ? value : -value; // Receita (A) soma, despesa (B) subtrai
+        
           return acc;
         }, {});
 
@@ -84,6 +91,11 @@ function ExpensesByCategory() {
     await AsyncStorage.setItem('transactions', JSON.stringify(updatedTransactions));
   };
 
+
+
+
+  
+
   const renderTransaction = ({ item, index, category }) => {
     // Formatar a data
     const date = new Date(item.date);
@@ -103,18 +115,20 @@ function ExpensesByCategory() {
     );
   };
 
-  const renderCategory = ({ item: [category, transactions] }) => (
+  const renderCategory = ({ item: [category, { transactions, total }] }) => (
     <View style={styles.categoryContainer}>
-      <Text style={styles.categoryTitle}>{category}</Text>
-
+      <View style={styles.categoryHeader}>
+        <Text style={styles.categoryTitle}>{category}  <Text style={{color:'black',fontSize:16}}>R$ {total.toFixed(2)}</Text></Text>
+       
+      </View>
       <FlatList
         data={transactions}
         keyExtractor={(item, index) => index.toString()}
         renderItem={(transactionItem) => renderTransaction({ ...transactionItem, category })}
       />
-
     </View>
   );
+  
 
   return (
     <View style={styles.container}>
